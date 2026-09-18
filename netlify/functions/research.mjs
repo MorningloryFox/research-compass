@@ -21,7 +21,7 @@ export default async request => {
   if (!process.env.GOOGLE_API_KEY) return json({ answer: `Modo demonstrativo: a pergunta foi associada a ${sources.length} fonte(s). A síntese Gemini será habilitada quando GOOGLE_API_KEY estiver configurada no Netlify.`, sources, mode: 'retrieval-only' });
   const prompt = `Você é um assistente de pesquisa. Responda em português, em no máximo 130 palavras, somente com base nas evidências abaixo. Cite [1], [2] ou [3] em cada afirmação factual. Se as evidências não bastarem, diga isso.\n\nPergunta: ${question}\n\nEvidências:\n${evidence}`;
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GOOGLE_API_KEY }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 300 } }) });
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GOOGLE_API_KEY }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 300 } }) });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload?.error?.message || 'Gemini indisponível.');
     return json({ answer: payload.candidates?.[0]?.content?.parts?.map(part => part.text).join('') || 'O modelo não retornou texto.', sources, mode: 'gemini-grounded' });
